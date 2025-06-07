@@ -4,42 +4,48 @@ import typer
 from pathlib import Path
 import polars as pl
 
-def get_metadata(vcf_path: Path) -> str:
+def get_metadata(vcf_path: Path) -> list[str]:
     metadata = []
     with vcf_path.open("rt") as f:
         for line in f:
             if line.startswith("##"):
-                metadata.append(line[2:])  # Remove the starting "##"
+                metadata.append(line)
             else:
                 break
-    return "".join(metadata)
+    return metadata
 
-def parse_metadata_to_dict(metadata: str) -> dict:
-    """
-    Parse VCF metadata lines into a dictionary.
-    """
-    meta_dict = {}
-    pattern = re.compile(r'(\w+)=<(.+)>')
-    for line in metadata.strip().splitlines():
-        match = pattern.match(line)
-        if match:
-            key, content = match.groups()
-            # Split content into key-value pairs
-            fields = {}
-            for item in re.findall(r'(\w+)=("[^"]*"|[^,]+)', content):
-                k, v = item
-                fields[k] = v.strip('"')
-            if key not in meta_dict:
-                meta_dict[key] = []
-            meta_dict[key].append(fields)
-    return meta_dict
 
+def tags_to_dict(val: str):
+    if val.startswith("<") and val.endswith(">"):
+        val = val.removeprefix("<").removesuffix(">")
+        return dict([x.split("=") for x in val.split(",")])
+    else:
+        #else, dont do anything
+        return val
+    
 def save_metadata_to_json(vcf_path: Path):
     metadata = get_metadata(vcf_path)
-    meta_dict = parse_metadata_to_dict(metadata)
+
+    metadata_trim = [x.strip() for x in metadata]
+    metadata_remove_doublehash = [x.removeprefix("##") for x in metadata_trim]
+    metadata_keys_and_vals = ([x.split("=", 1) for x in metadata_remove_doublehash])
+    # there can be multiple fields for INFO, FORMAT FILTER etc, we should accumulate them
+    metadata_keys = list(set(
+        [x[0] for x in metadata_keys_and_vals]
+    ))
+    metadata_dict = dict([(x,[]) for x in metadata_keys])
+    for (k,v) in metadata_keys_and_vals:
+        metadata_dict[k].append(v)
+    pass
+
+    # in values, there are tags like: <ID=CNV,Description="Copy number variable region">, make them a sub dict
+    #metadata_dict_tags_parsed = ([(k,tags_to_dict(v)) for k,v in metadata_dict])
+
+    #print(metadata_dict_tags_parsed)
+
     json_path = vcf_path.with_suffix(vcf_path.suffix + '.metadata.json')
     with open(json_path, "w") as f:
-        json.dump(meta_dict, f, indent=2)
+        json.dump(metadata_dict, f, indent=2)
     print(f"Metadata saved to {json_path}")
 
 def save_data_to_parquet(vcf_path: Path):
@@ -61,4 +67,5 @@ def main(vcf_path: Path):
     save_metadata_to_json(vcf_path)
 
 if __name__ == "__main__":
+    
     typer.run(main)

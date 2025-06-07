@@ -1,98 +1,41 @@
 {
-  "INFO": [
-    {
-      "ID": "NS",
-      "Number": "1",
-      "Type": "Integer",
-      "Description": "Number of Samples With Data"
-    },
-    {
-      "ID": "AN",
-      "Number": "1",
-      "Type": "Integer",
-      "Description": "Total number of alleles in called genotypes"
-    },
-    {
-      "ID": "AC",
-      "Number": ".",
-      "Type": "Integer",
-      "Description": "Allele count in genotypes, for each ALT allele, in the same order as listed"
-    },
-    {
-      "ID": "DP",
-      "Number": "1",
-      "Type": "Integer",
-      "Description": "Total Depth"
-    },
-    {
-      "ID": "AF",
-      "Number": ".",
-      "Type": "Float",
-      "Description": "Allele Frequency"
-    },
-    {
-      "ID": "AA",
-      "Number": "1",
-      "Type": "String",
-      "Description": "Ancestral Allele"
-    },
-    {
-      "ID": "DB",
-      "Number": "0",
-      "Type": "Flag",
-      "Description": "dbSNP membership, build 129"
-    },
-    {
-      "ID": "H2",
-      "Number": "0",
-      "Type": "Flag",
-      "Description": "HapMap2 membership"
-    }
-  ],
-  "FILTER": [
-    {
-      "ID": "q10",
-      "Description": "Quality below 10"
-    },
-    {
-      "ID": "s50",
-      "Description": "Less than 50% of samples have data"
-    }
+  "ALT": [
+    "<ID=DEL:ME:ALU,Description=\"Deletion of ALU element\">",
+    "<ID=CNV,Description=\"Copy number variable region\">"
   ],
   "FORMAT": [
-    {
-      "ID": "GT",
-      "Number": "1",
-      "Type": "String",
-      "Description": "Genotype"
-    },
-    {
-      "ID": "GQ",
-      "Number": "1",
-      "Type": "Integer",
-      "Description": "Genotype Quality"
-    },
-    {
-      "ID": "DP",
-      "Number": "1",
-      "Type": "Integer",
-      "Description": "Read Depth"
-    },
-    {
-      "ID": "HQ",
-      "Number": "2",
-      "Type": "Integer",
-      "Description": "Haplotype Quality"
-    }
+    "<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+    "<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">",
+    "<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">",
+    "<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">"
   ],
-  "ALT": [
-    {
-      "ID": "DEL:ME:ALU",
-      "Description": "Deletion of ALU element"
-    },
-    {
-      "ID": "CNV",
-      "Description": "Copy number variable region"
-    }
+  "FILTER": [
+    "<ID=q10,Description=\"Quality below 10\">",
+    "<ID=s50,Description=\"Less than 50% of samples have data\">"
+  ],
+  "phasing": [
+    "partial"
+  ],
+  "source": [
+    "myImputationProgramV3.1"
+  ],
+  "fileformat": [
+    "VCFv4.0"
+  ],
+  "INFO": [
+    "<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">",
+    "<ID=AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes\">",
+    "<ID=AC,Number=.,Type=Integer,Description=\"Allele count in genotypes, for each ALT allele, in the same order as listed\">",
+    "<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">",
+    "<ID=AF,Number=.,Type=Float,Description=\"Allele Frequency\">",
+    "<ID=AA,Number=1,Type=String,Description=\"Ancestral Allele\">",
+    "<ID=DB,Number=0,Type=Flag,Description=\"dbSNP membership, build 129\">",
+    "<ID=H2,Number=0,Type=Flag,Description=\"HapMap2 membership\">"
+  ],
+  "fileDate": [
+    "20090805"
+  ],
+  "reference": [
+    "1000GenomesPilot-NCBI36"
   ]
 }

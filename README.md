@@ -1,6 +1,6 @@
 # Why Should you convert VCF Files To Parquet
 
-VCF is a ubiquitous file format in genomics, and in its essence it is a formatted tsv file that is mostly also gzipped. Apparent from its formatting (https://samtools.github.io/hts-specs/VCFv4.2.pdf), this format would benefit from columnar storage of its data, which parquet files does. If you wa
+VCF is a ubiquitous file format in genomics, and in its essence it is a formatted tsv file that is mostly also gzipped. Apparent from its formatting (https://samtools.github.io/hts-specs/VCFv4.2.pdf), this format would benefit from columnar storage of its data, which parquet files does. If you want to learn more about performance benefits of parquet format over VCF, you can take a look at https://medium.com/23andme-engineering/genetic-datastore-4b213256db31.
 
 # How Vcf2Parquet Processes VCFs
 
@@ -12,9 +12,9 @@ use https://gatk.broadinstitute.org/hc/en-us/articles/360036896892-VariantsToTab
 This repo uses uv: https://github.com/astral-sh/uv
 
 ```
-git clone ...
+git clone https://github.com/yusufozgur/vcf2parquet
 uv sync
-...
+uv run python vcf2parquet.py sample.vcf
 ```
 
 # Sources

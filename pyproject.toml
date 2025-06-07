@@ -8,3 +8,6 @@ dependencies = [
     "polars>=1.30.0",
     "typer>=0.16.0",
 ]
+
+[project.scripts]
+vcf2parquet = "vcf2parquet"

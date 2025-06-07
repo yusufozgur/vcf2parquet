@@ -9,7 +9,14 @@ use https://gatk.broadinstitute.org/hc/en-us/articles/360036896892-VariantsToTab
 
 # How to use
 
-This repo uses uv: https://github.com/astral-sh/uv
+install uv: https://github.com/astral-sh/uv
+
+To use, invoke the command like this:
+```
+uvx git+https://github.com/yusufozgur/vcf2parquet input.vcf output_prefix
+```
+
+# How to develop with it
 
 ```
 git clone https://github.com/yusufozgur/vcf2parquet

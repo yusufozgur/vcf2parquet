@@ -60,7 +60,7 @@ def save_data_to_parquet(vcf_path: Path, output_path: Path):
     df.write_parquet(parquet_path)
     print(f"Data saved to {parquet_path}")
 
-def main(vcf_path: Path, output_path: Path):
+def app(vcf_path: Path, output_path: Path):
     if not vcf_path.exists():
         print(f"File '{vcf_path}' does not exist.")
         return
@@ -72,6 +72,8 @@ def main(vcf_path: Path, output_path: Path):
     save_data_to_parquet(vcf_path, output_path)
     save_metadata_to_json(vcf_path, output_path)
 
+def main():
+    typer.run(app)
+
 if __name__ == "__main__":
-    
-    typer.run(main)
+    main()

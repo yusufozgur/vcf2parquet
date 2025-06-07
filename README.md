@@ -16,3 +16,7 @@ git clone ...
 uv sync
 ...
 ```
+
+# Sources
+
+-   sample vcf: https://github.com/vcflib/vcflib/blob/master/samples/sample.vcf

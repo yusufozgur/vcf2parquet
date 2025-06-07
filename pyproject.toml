@@ -10,4 +10,4 @@ dependencies = [
 ]
 
 [project.scripts]
-vcf2parquet = "vcf2parquet"
+vcf2parquet = "vcf2parquet:main"

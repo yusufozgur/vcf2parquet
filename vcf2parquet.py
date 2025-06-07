@@ -34,7 +34,7 @@ def tags_to_dict(val: str):
         #else, dont do anything
         return val
     
-def save_metadata_to_json(vcf_path: Path):
+def save_metadata_to_json(vcf_path: Path, output_path: Path):
     metadata = get_metadata(vcf_path)
 
     metadata_trim = [x.strip() for x in metadata]
@@ -49,18 +49,18 @@ def save_metadata_to_json(vcf_path: Path):
         metadata_dict[k].append(v)
     pass
 
-    json_path = vcf_path.with_suffix(vcf_path.suffix + '.metadata.json')
+    json_path = output_path.with_suffix('.metadata.json')
     with open(json_path, "w") as f:
         json.dump(metadata_dict, f, indent=2)
     print(f"Metadata saved to {json_path}")
 
-def save_data_to_parquet(vcf_path: Path):
+def save_data_to_parquet(vcf_path: Path, output_path: Path):
     df = pl.scan_csv(vcf_path, comment_prefix="##", separator="\t").collect()
-    parquet_path = vcf_path.with_suffix(vcf_path.suffix + '.parquet')
+    parquet_path = output_path.with_suffix('.parquet')
     df.write_parquet(parquet_path)
     print(f"Data saved to {parquet_path}")
 
-def main(vcf_path: Path):
+def main(vcf_path: Path, output_path: Path):
     if not vcf_path.exists():
         print(f"File '{vcf_path}' does not exist.")
         return
@@ -69,8 +69,8 @@ def main(vcf_path: Path):
         print("Input file must have a .vcf or .vcf.gz extension.")
         return
 
-    save_data_to_parquet(vcf_path)
-    save_metadata_to_json(vcf_path)
+    save_data_to_parquet(vcf_path, output_path)
+    save_metadata_to_json(vcf_path, output_path)
 
 if __name__ == "__main__":
     

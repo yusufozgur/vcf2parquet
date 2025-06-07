@@ -14,7 +14,7 @@ This repo uses uv: https://github.com/astral-sh/uv
 ```
 git clone https://github.com/yusufozgur/vcf2parquet
 uv sync
-uv run python vcf2parquet.py sample.vcf
+uv run python vcf2parquet.py example_data/example.vcf example_output/example_output
 ```
 
 # Sources

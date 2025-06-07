@@ -3,15 +3,26 @@ import re
 import typer
 from pathlib import Path
 import polars as pl
+import gzip
+
 
 def get_metadata(vcf_path: Path) -> list[str]:
     metadata = []
-    with vcf_path.open("rt") as f:
-        for line in f:
-            if line.startswith("##"):
-                metadata.append(line)
-            else:
-                break
+
+    if vcf_path.name.endswith(".gz"):
+        with gzip.open(vcf_path, "rt") as f:
+            for line in f:
+                if line.startswith("##"):
+                    metadata.append(line)
+                else:
+                    break
+    else:
+        with vcf_path.open("rt") as f:
+            for line in f:
+                if line.startswith("##"):
+                    metadata.append(line)
+                else:
+                    break
     return metadata
 
 
@@ -37,11 +48,6 @@ def save_metadata_to_json(vcf_path: Path):
     for (k,v) in metadata_keys_and_vals:
         metadata_dict[k].append(v)
     pass
-
-    # in values, there are tags like: <ID=CNV,Description="Copy number variable region">, make them a sub dict
-    #metadata_dict_tags_parsed = ([(k,tags_to_dict(v)) for k,v in metadata_dict])
-
-    #print(metadata_dict_tags_parsed)
 
     json_path = vcf_path.with_suffix(vcf_path.suffix + '.metadata.json')
     with open(json_path, "w") as f:

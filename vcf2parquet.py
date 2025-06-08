@@ -4,7 +4,7 @@ import typer
 from pathlib import Path
 import polars as pl
 import gzip
-
+from typing_extensions import Annotated
 
 def get_metadata(vcf_path: Path) -> list[str]:
     metadata = []
@@ -54,13 +54,18 @@ def save_metadata_to_json(vcf_path: Path, output_path: Path):
         json.dump(metadata_dict, f, indent=2)
     print(f"Metadata saved to {json_path}")
 
-def save_data_to_parquet(vcf_path: Path, output_path: Path):
-    df = pl.scan_csv(vcf_path, comment_prefix="##", separator="\t").collect()
+def save_data_to_parquet(vcf_path: Path, output_path: Path, chunk_size: int):
+    pl.Config.set_streaming_chunk_size(chunk_size)
+    query = pl.scan_csv(vcf_path, comment_prefix="##", separator="\t", low_memory=True)
     parquet_path = output_path.with_suffix('.parquet')
-    df.write_parquet(parquet_path)
+    query.sink_parquet(parquet_path)
     print(f"Data saved to {parquet_path}")
 
-def app(vcf_path: Path, output_path: Path):
+def app(
+        vcf_path: Path, 
+        output_path: Path, 
+        chunk_size: Annotated[int, typer.Option(help="Number of rows for each chunk that is being streamed. Increase this if you have more ram. Decrease it if you have less ram.")] = 500,
+        ):
     if not vcf_path.exists():
         print(f"File '{vcf_path}' does not exist.")
         return
@@ -69,7 +74,7 @@ def app(vcf_path: Path, output_path: Path):
         print("Input file must have a .vcf or .vcf.gz extension.")
         return
 
-    save_data_to_parquet(vcf_path, output_path)
+    save_data_to_parquet(vcf_path, output_path, chunk_size)
     save_metadata_to_json(vcf_path, output_path)
 
 def main():

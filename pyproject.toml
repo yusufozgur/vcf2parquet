@@ -6,8 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "polars>=1.30.0",
+    "polars-streaming-csv-decompression",
     "typer>=0.16.0",
 ]
 
 [project.scripts]
 vcf2parquet = "vcf2parquet:main"
+
+[tool.uv.sources]
+polars-streaming-csv-decompression = { git = "https://github.com/ghuls/polars_streaming_csv_decompression.git" }

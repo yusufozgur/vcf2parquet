@@ -3,6 +3,7 @@ import re
 import typer
 from pathlib import Path
 import polars as pl
+import polars_streaming_csv_decompression
 import gzip
 from typing_extensions import Annotated
 
@@ -56,11 +57,15 @@ def save_metadata_to_json(vcf_path: Path, output_path: Path):
 
 def save_data_to_parquet(vcf_path: Path, output_path: Path, chunk_size: int):
     #pl.Config.set_streaming_chunk_size(chunk_size)
-    with gzip.open(vcf_path, "rt") as f:
-        query = pl.scan_csv(f, comment_prefix="##", separator="\t", low_memory=True)
-        parquet_path = output_path.with_suffix('.parquet')
-        query.sink_parquet(parquet_path, engine="streaming")
-        print(f"Data saved to {parquet_path}")
+    parquet_path = output_path.with_suffix('.parquet')
+    lf = polars_streaming_csv_decompression.streaming_csv(
+        vcf_path,
+        comment_prefix="##",
+        separator="\t",
+        low_memory=True,
+    )
+    lf.sink_parquet(parquet_path, engine="streaming")
+    print(f"Data saved to {parquet_path}")
 
 def app(
         vcf_path: Path, 

@@ -1,24 +1,34 @@
 {
+  "source": [
+    "myImputationProgramV3.1"
+  ],
   "bcftools_viewCommand": [
     "view -o sample.vcf.gz sample.vcf; Date=Sat Jun  7 15:37:12 2025"
   ],
-  "fileformat": [
-    "VCFv4.0"
+  "FORMAT": [
+    "<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+    "<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">",
+    "<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">",
+    "<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">"
   ],
-  "reference": [
-    "1000GenomesPilot-NCBI36"
+  "phasing": [
+    "partial"
   ],
-  "source": [
-    "myImputationProgramV3.1"
+  "ALT": [
+    "<ID=DEL:ME:ALU,Description=\"Deletion of ALU element\">",
+    "<ID=CNV,Description=\"Copy number variable region\">"
   ],
   "bcftools_viewVersion": [
     "1.22+htslib-1.22"
   ],
+  "reference": [
+    "1000GenomesPilot-NCBI36"
+  ],
   "fileDate": [
     "20090805"
   ],
-  "phasing": [
-    "partial"
+  "fileformat": [
+    "VCFv4.0"
   ],
   "INFO": [
     "<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">",
@@ -34,15 +44,5 @@
     "<ID=PASS,Description=\"All filters passed\">",
     "<ID=q10,Description=\"Quality below 10\">",
     "<ID=s50,Description=\"Less than 50% of samples have data\">"
-  ],
-  "FORMAT": [
-    "<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
-    "<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">",
-    "<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">",
-    "<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">"
-  ],
-  "ALT": [
-    "<ID=DEL:ME:ALU,Description=\"Deletion of ALU element\">",
-    "<ID=CNV,Description=\"Copy number variable region\">"
   ]
 }

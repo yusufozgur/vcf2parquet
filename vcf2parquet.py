@@ -55,11 +55,12 @@ def save_metadata_to_json(vcf_path: Path, output_path: Path):
     print(f"Metadata saved to {json_path}")
 
 def save_data_to_parquet(vcf_path: Path, output_path: Path, chunk_size: int):
-    pl.Config.set_streaming_chunk_size(chunk_size)
-    query = pl.scan_csv(vcf_path, comment_prefix="##", separator="\t", low_memory=True)
-    parquet_path = output_path.with_suffix('.parquet')
-    query.sink_parquet(parquet_path)
-    print(f"Data saved to {parquet_path}")
+    #pl.Config.set_streaming_chunk_size(chunk_size)
+    with gzip.open(vcf_path, "rt") as f:
+        query = pl.scan_csv(f, comment_prefix="##", separator="\t", low_memory=True)
+        parquet_path = output_path.with_suffix('.parquet')
+        query.sink_parquet(parquet_path, engine="streaming")
+        print(f"Data saved to {parquet_path}")
 
 def app(
         vcf_path: Path, 

@@ -1,29 +1,10 @@
 import json
-import re
 import typer
 from pathlib import Path
-import polars as pl
+import pandas as pd
 import gzip
-from typing_extensions import Annotated
-
-def get_metadata(vcf_path: Path) -> list[str]:
-    metadata = []
-
-    if vcf_path.name.endswith(".gz"):
-        with gzip.open(vcf_path, "rt") as f:
-            for line in f:
-                if line.startswith("##"):
-                    metadata.append(line)
-                else:
-                    break
-    else:
-        with vcf_path.open("rt") as f:
-            for line in f:
-                if line.startswith("##"):
-                    metadata.append(line)
-                else:
-                    break
-    return metadata
+import io
+import fastparquet
 
 
 def tags_to_dict(val: str):
@@ -34,9 +15,7 @@ def tags_to_dict(val: str):
         #else, dont do anything
         return val
     
-def save_metadata_to_json(vcf_path: Path, output_path: Path):
-    metadata = get_metadata(vcf_path)
-
+def save_metadata(metadata: list[str], json_path: Path):
     metadata_trim = [x.strip() for x in metadata]
     metadata_remove_doublehash = [x.removeprefix("##") for x in metadata_trim]
     metadata_keys_and_vals = ([x.split("=", 1) for x in metadata_remove_doublehash])
@@ -49,22 +28,52 @@ def save_metadata_to_json(vcf_path: Path, output_path: Path):
         metadata_dict[k].append(v)
     pass
 
-    json_path = output_path.with_suffix('.metadata.json')
     with open(json_path, "w") as f:
         json.dump(metadata_dict, f, indent=2)
     print(f"Metadata saved to {json_path}")
 
-def save_data_to_parquet(vcf_path: Path, output_path: Path, chunk_size: int):
-    pl.Config.set_streaming_chunk_size(chunk_size)
-    query = pl.scan_csv(vcf_path, comment_prefix="##", separator="\t", low_memory=True)
+def get_file_reader(vcf_path: Path) -> io.TextIOWrapper:
+    if vcf_path.name.endswith(".gz"):
+        return gzip.open(vcf_path, "rt")
+    else:
+        return vcf_path.open("rt")
+
+
+
+def read_file(vcf_path: Path, output_path: Path):
+    metadata: list[str] = []
+    headers: list[str] = []
+    shouldappend = False # this ensures first file creation then only appending
     parquet_path = output_path.with_suffix('.parquet')
-    query.sink_parquet(parquet_path)
+    json_path = output_path.with_suffix('.metadata.json')
+
+    if vcf_path.name.endswith(".gz"):
+        with get_file_reader(vcf_path) as f:
+            for i, line in enumerate(f):
+                if line.startswith("##"):
+                    metadata.append(line)
+                elif line.startswith("#"):
+                    headers = line.strip().split("\t")
+                else:
+                    list_of_values = line.strip().split("\t")
+                    fastparquet.write(
+                        parquet_path,
+                        pd.DataFrame([list_of_values], columns=headers), 
+                        append=shouldappend
+                        )
+                    shouldappend = True
+                    if i % 10 == 0:
+                        print(f"Processing line {i}", end="\r")
+
+
     print(f"Data saved to {parquet_path}")
+
+    save_metadata(metadata, json_path)
+
 
 def app(
         vcf_path: Path, 
-        output_path: Path, 
-        chunk_size: Annotated[int, typer.Option(help="Number of rows for each chunk that is being streamed. Increase this if you have more ram. Decrease it if you have less ram.")] = 500,
+        output_path: Path,
         ):
     if not vcf_path.exists():
         print(f"File '{vcf_path}' does not exist.")
@@ -73,9 +82,8 @@ def app(
     if not (vcf_path.name.endswith(".vcf") or vcf_path.name.endswith(".vcf.gz")):
         print("Input file must have a .vcf or .vcf.gz extension.")
         return
-
-    save_data_to_parquet(vcf_path, output_path, chunk_size)
-    save_metadata_to_json(vcf_path, output_path)
+    
+    read_file(vcf_path, output_path)
 
 def main():
     typer.run(app)

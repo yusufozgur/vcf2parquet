@@ -41,10 +41,11 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
             if header == None {
                 panic!("a header row must exist before data rows")
             }
-            create_parquet(&out_path, header.clone().unwrap(), firstrow.clone().unwrap());
-        }
-        else {
-            //println!("{:?}", line);
+            create_parquet(&out_path, &header.unwrap(), &firstrow.unwrap());
+            // putting a break here as header will give error otherwise
+            // this is due to heaeder possibly being accessed next loop
+            // instead, break this loop and handle the data rows in another loop
+            break;
         }
 
     }

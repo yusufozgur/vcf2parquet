@@ -3,30 +3,16 @@ use arrow::{
     array::{ArrayRef, Int64Array, StringArray},
     record_batch::RecordBatch
 };
+use clap::builder::Str;
 use std::sync::Arc;
 use parquet::{
-    basic::{Compression, ConvertedType, Repetition, Type as PhysicalType},
-    schema::{parser, printer, types::Type},
     arrow::ArrowWriter,
-    file::properties::WriterProperties
 };
 use std::path::PathBuf;
 
-fn create_schema (header: &Vec<&str>, firstrow: &Vec<&str> ) -> Vec<Arc<Type>> {
-    header.iter().map(|x| {
-        match x {
-            _ => Arc::new(
-                Type::primitive_type_builder("a", PhysicalType::BYTE_ARRAY)
-                .with_converted_type(ConvertedType::UTF8)
-                .with_repetition(Repetition::REQUIRED)
-                .build()
-                .unwrap()
-            )
-        }
-    }).collect()
-}
+use std::iter::zip;
 
-pub fn create_parquet(out_path: &PathBuf, header: String, firstrow: String) {
+pub fn create_parquet(out_path: &PathBuf, header: &String, firstrow: &String) {
     // Create the output file path with .parquet extension
     let parquet_path = out_path.with_extension("parquet");
     
@@ -44,13 +30,20 @@ pub fn create_parquet(out_path: &PathBuf, header: String, firstrow: String) {
     let mut file = fs::File::create(&parquet_path).expect("Failed to create parquet file");
     
     //let col = Arc::new(StringArray::from_iter_values(firstrow)) as ArrayRef;
-    let to_write = RecordBatch::try_from_iter(
-        [
+
+    let to_write: Vec<(&str, Arc<dyn arrow::array::Array>)> = zip(header, firstrow)
+        .map(|(colname, val)| {
             (
-                "col",
-                Arc::new(StringArray::from_iter_values(vec!["zart"])) as ArrayRef
+                colname, 
+                Arc::new(StringArray::from_iter_values(vec![val])) as ArrayRef
             )
-            ]
+        })
+        .collect();
+
+    println!("{:?}",to_write);
+
+    let to_write = RecordBatch::try_from_iter(
+        to_write
     ).unwrap();
 
     let mut writer = ArrowWriter::try_new(

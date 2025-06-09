@@ -32,7 +32,7 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf, limit: Option<i32>) {
     for line in reader.lines() {
 
         line_count += 1;
-        if line_count % 10 == 0 {
+        if line_count % 100 == 0 {
             println!("Processed {} lines", line_count);
         }
         if Option::is_some(&limit) && line_count > limit.unwrap() {

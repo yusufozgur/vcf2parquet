@@ -9,12 +9,13 @@ use parquet::{
     basic::Compression,
 };
 use std::path::PathBuf;
+use std::io::BufWriter;
 
 use std::iter::zip;
 
 #[derive(Debug)]
 pub struct ParquetWriter {
-    writer: ArrowWriter<fs::File>,
+    writer: ArrowWriter<BufWriter<std::fs::File>>,
     header: Vec<String>,
 }
 
@@ -36,7 +37,7 @@ impl ParquetWriter {
         }
 
         let file = fs::File::create(&parquet_path).expect("Failed to create parquet file");
-        
+        let buf_writer = BufWriter::with_capacity(16 * 1024 * 1024, file);
 
         // WriterProperties can be used to set Parquet file options
         let props = WriterProperties::builder()
@@ -57,8 +58,8 @@ impl ParquetWriter {
             col_and_vals
         ).unwrap();
 
-        let mut writer: ArrowWriter<fs::File> = ArrowWriter::try_new(
-            file, 
+        let mut writer: ArrowWriter<BufWriter<fs::File>> = ArrowWriter::try_new(
+            buf_writer, 
             to_write.schema(), 
             Some(props)
         ).unwrap();
@@ -96,7 +97,11 @@ impl Drop for ParquetWriter {
     fn drop(&mut self) {
         // Take ownership of the writer to call close, replacing it with a dummy writer
         let dummy_file = fs::File::create("/dev/null").unwrap();
-        let writer = std::mem::replace(&mut self.writer, ArrowWriter::try_new(dummy_file, Arc::new(arrow::datatypes::Schema::empty()), None).unwrap());
+        let dummy_buf_writer = BufWriter::new(dummy_file);
+        let writer = std::mem::replace(
+            &mut self.writer, 
+            ArrowWriter::try_new(dummy_buf_writer, Arc::new(arrow::datatypes::Schema::empty()), None).unwrap()
+        );
         writer.close().unwrap();
     }
 }

@@ -4,6 +4,7 @@ use std::time::Instant;
 
 mod vcf;
 use vcf::read_vcf;
+mod create_parquet;
 
 /// VCF to Parquet converter
 #[derive(Parser, Debug)]
@@ -26,7 +27,7 @@ fn main() {
     println!("Input VCF: {}", args.input_vcf.display());
     println!("Output prefix: {}", args.output_prefix.display());
 
-    read_vcf(&args.input_vcf);
+    read_vcf(&args.input_vcf, &args.output_prefix);
 
     let execution_duration = start_time.elapsed();
     println!("Main function took: {:?}", execution_duration);

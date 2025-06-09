@@ -7,20 +7,31 @@ use std::path::PathBuf;
 pub fn read_vcf(path: &PathBuf) {
     println!("Reading CSV from: {}", path.display());
 
-    // Open the bgzip file
     let file = File::open(path).expect("File could not be opened.");
     
-    // Create a MultiGzDecoder to handle bgzip format
-    let decoder = MultiGzDecoder::new(file);
+    // normal gzdecoder does not read after # in bgzip files for some reason, hence multigzdecoder
+    let reader: Box<dyn std::io::BufRead> = if path.ends_with(".vcf.gz") {
+        Box::new(BufReader::new(MultiGzDecoder::new(file)))
+    } else {
+        Box::new(BufReader::new(file))
+    };
     
-    // Wrap in a BufReader for efficient line reading
-    let reader = BufReader::new(decoder);
-    
+    let mut metadata: Vec<String> = Vec::new();
+    let mut header: Option<String> = None;
     // Loop over lines
     for line in reader.lines() {
-        match line {
-            Ok(line) => println!("{}", line),
-            Err(e) => eprintln!("Error during reading file: {}", e)
+
+        let line = line.expect("Line could not be read.");
+        if line.starts_with("##") {
+            metadata.push(line);
         }
+        else if line.starts_with("#") {
+            header = Some(line);
+        }
+        else {
+            println!("{:?}", line);
+        }
+
     }
+    println!("{:?}", header.expect("No header found."));
 }

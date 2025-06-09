@@ -12,11 +12,15 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
 
     let file = File::open(read_path).expect("File could not be opened.");
     
+    let file_extension =  read_path.extension().expect("extension cannot be get, is it a .vcf or .vcf.gz file?");
+    
     // normal gzdecoder does not read after # in bgzip files for some reason, hence multigzdecoder
-    let reader: Box<dyn std::io::BufRead> = if read_path.ends_with(".vcf.gz") {
+    let reader: Box<dyn std::io::BufRead> = if file_extension == "gz" {
         Box::new(BufReader::new(MultiGzDecoder::new(file)))
-    } else {
+    } else if file_extension == "vcf" {
         Box::new(BufReader::new(file))
+    } else {
+        panic!("Please provide a file with extension .vcf or .vcf.gz")
     };
     
     let mut metadata: Vec<String> = Vec::new();
@@ -37,12 +41,12 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
             if header == None {
                 panic!("a header row must exist before data rows")
             }
-            create_parquet(&out_path, &header, &firstrow);
+            create_parquet(&out_path, header.clone().unwrap(), firstrow.clone().unwrap());
         }
         else {
-            println!("{:?}", line);
+            //println!("{:?}", line);
         }
 
     }
-    println!("{:?}", header.expect("No header found."));
+    //println!("{:?}", header.expect("No header found."));
 }

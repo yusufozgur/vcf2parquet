@@ -13,7 +13,7 @@
                     "run",
                 ]
             },
-            "args": ["example.vcf.gz","example_output"]
+            "args": ["-i","example/example.vcf.gz","-o","example/example_output_test"]
         },
         {
             "name": "Python Debugger: Current File with Arguments",

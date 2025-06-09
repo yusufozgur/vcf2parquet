@@ -4,10 +4,9 @@ use std::io::{BufRead, BufReader};
 
 use std::path::PathBuf;
 
-use crate::create_parquet::create_parquet;
+use crate::parquet_writer::ParquetWriter;
 
-
-pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
+pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf, limit: Option<i32>) {
     println!("Reading CSV from: {}", read_path.display());
 
     let file = File::open(read_path).expect("File could not be opened.");
@@ -26,8 +25,19 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
     let mut metadata: Vec<String> = Vec::new();
     let mut header: Option<String> = None;
     let mut firstrow: Option<String> = None;
+    let mut writer: Option<ParquetWriter> = None;
+
+    let mut line_count = 0;
     // Loop over lines
     for line in reader.lines() {
+
+        line_count += 1;
+        if line_count % 10 == 0 {
+            println!("Processed {} lines", line_count);
+        }
+        if Option::is_some(&limit) && line_count > limit.unwrap() {
+            break
+        }
 
         let line = line.expect("Line could not be read.");
         if line.starts_with("##") {
@@ -41,11 +51,10 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf) {
             if header == None {
                 panic!("a header row must exist before data rows")
             }
-            create_parquet(&out_path, &header.unwrap(), &firstrow.unwrap());
-            // putting a break here as header will give error otherwise
-            // this is due to heaeder possibly being accessed next loop
-            // instead, break this loop and handle the data rows in another loop
-            break;
+            writer = Some(ParquetWriter::new(&out_path, header.clone().unwrap(), firstrow.clone().unwrap()));
+        }
+        else {
+            writer.as_mut().unwrap().write(&line)
         }
 
     }

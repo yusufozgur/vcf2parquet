@@ -54,7 +54,7 @@ pub fn read_vcf(read_path: &PathBuf, out_path: &PathBuf, limit: Option<i32>) {
             writer = Some(ParquetWriter::new(&out_path, header.clone().unwrap(), firstrow.clone().unwrap()));
         }
         else {
-            writer.as_mut().unwrap().write(&line)
+            writer.as_mut().unwrap().add_row(&line)
         }
 
     }
